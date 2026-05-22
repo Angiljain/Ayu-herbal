@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Leaf, Award, HeartHandshake, Sparkles, MessageCircle } from 'lucide-react';
+import { Leaf, Award, HeartHandshake, Sparkles, MessageCircle, Phone, Mail } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -72,8 +72,28 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Quick Contact</h3>
             <p className="text-xs sm:text-sm text-beige-200/70 leading-relaxed mb-4">
               Jain Trading Company<br />
-              Need help or custom orders? Reach out directly via WhatsApp.
+              Need help or custom orders? Reach out directly.
             </p>
+            <ul className="space-y-3 mb-5">
+              <li>
+                <a
+                  href="tel:+918209940507"
+                  className="inline-flex items-center space-x-2 text-beige-200/80 hover:text-brand-300 transition-colors text-xs sm:text-sm"
+                >
+                  <Phone className="w-4 h-4 text-brand-300" />
+                  <span>+91 8209940507</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:n2570201@gmail.com"
+                  className="inline-flex items-center space-x-2 text-beige-200/80 hover:text-brand-300 transition-colors text-xs sm:text-sm"
+                >
+                  <Mail className="w-4 h-4 text-brand-300" />
+                  <span>n2570201@gmail.com</span>
+                </a>
+              </li>
+            </ul>
             <a
               href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'}`}
               target="_blank"

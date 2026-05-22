@@ -65,14 +65,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
       // 2. Generate WhatsApp message & Redirect
       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210';
-      
+
       let itemDetails = '';
       cart.forEach((item, index) => {
         itemDetails += `\n📦 ${index + 1}. *${item.product.name}*\n   Qty: ${item.quantity} | Price: ₹${item.product.price} each`;
       });
 
       const messageText = `Hi Ayu Herbal 👋\n\nI want to place an order:\n${itemDetails}\n\n*Total Amount:* ₹${totalPrice}\n\n*Customer Details:*\n👤 *Name:* ${customerName}\n📞 *Phone:* ${customerPhone}\n\nPlease confirm my order!`;
-      
+
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(messageText)}`;
 
       // Clear local cart
@@ -201,7 +201,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       required
-                      placeholder="Enter your Name"
+                      placeholder="Enter your name"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl border border-beige-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-beige-50/50 text-sm"
