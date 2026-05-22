@@ -23,7 +23,7 @@ export default function StoreLayout({
 
         {/* Floating WhatsApp Action Button */}
         <a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'}?text=Hi%20Ayu%20Herbal%20%F0%9F%8D%83%20I%20have%20a%20question%20about%20your%20products.`}
+          href="https://wa.me/918209940507?text=Hi%20Ayu%20Herbal%20%F0%9F%8D%83%20I%20have%20a%20question%20about%20your%20products."
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20ba5a] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-110 flex items-center justify-center cursor-pointer shadow-[#25D366]/40"

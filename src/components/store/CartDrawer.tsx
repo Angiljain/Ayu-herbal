@@ -64,7 +64,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       toast.success('Order request recorded!', { id: toastId });
 
       // 2. Generate WhatsApp message & Redirect
-      const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210';
+      const whatsappNumber = '918209940507';
 
       let itemDetails = '';
       cart.forEach((item, index) => {

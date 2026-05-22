@@ -47,7 +47,7 @@ const ProductDetailInteraction: React.FC<ProductDetailInteractionProps> = ({ pro
       });
 
       // 2. Open WhatsApp deep link with direct message
-      const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210';
+      const whatsappNumber = '918209940507';
       const messageText = `Hi Ayu Herbal 👋\n\nI want to buy this product directly:\n📦 *${product.name}*\nQty: ${qty}\nPrice: ₹${product.price} each\n\n*Total:* ₹${product.price * qty}\n\nPlease confirm stock and share details!`;
       
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(messageText)}`;

@@ -95,7 +95,7 @@ const Footer: React.FC = () => {
               </li>
             </ul>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'}`}
+              href="https://wa.me/918209940507"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-full font-medium transition-colors shadow shadow-brand-900/30 text-xs sm:text-sm cursor-pointer"
