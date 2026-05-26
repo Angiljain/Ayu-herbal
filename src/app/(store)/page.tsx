@@ -10,26 +10,94 @@ import ProductCard from '@/components/store/ProductCard';
 export const revalidate = 0; // Ensure fresh data on admin changes
 
 export default async function HomePage() {
-  // Automatically seed database on first visit if empty
-  await seedProductsIfNeeded();
+  // Fetch featured products with graceful fallback for offline/local dev
+  let featuredProducts: any[] = [];
 
-  await dbConnect();
-  
-  // Fetch featured products
-  const rawFeaturedProducts = await Product.find({ featured: true, visible: true })
-    .sort({ createdAt: -1 })
-    .limit(4);
+  try {
+    // Automatically seed database on first visit if empty
+    await seedProductsIfNeeded();
+    await dbConnect();
 
-  // Convert Mongoose documents to plain objects for frontend serialization
-  const featuredProducts = rawFeaturedProducts.map(doc => {
-    const p = doc.toObject();
-    return {
-      ...p,
-      _id: p._id.toString(),
-      createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
-    };
-  });
+    // Fetch featured products
+    const rawFeaturedProducts = await Product.find({ featured: true, visible: true })
+      .sort({ createdAt: -1 })
+      .limit(4);
+
+    // Convert Mongoose documents to plain objects for frontend serialization
+    featuredProducts = rawFeaturedProducts.map(doc => {
+      const p = doc.toObject();
+      return {
+        ...p,
+        _id: p._id.toString(),
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+      };
+    });
+  } catch (error) {
+    console.warn('Database connection failed, using fallback featured products:', error);
+    featuredProducts = [
+      {
+        _id: 'fallback-1',
+        name: 'Bhringraj Herbal Hair Oil',
+        price: 299,
+        category: 'Herbal',
+        image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?q=80&w=600&auto=format&fit=crop',
+        description: '100% natural Ayurvedic hair growth oil formulated with premium Bhringraj extracts.',
+        slug: 'bhringraj-herbal-hair-oil',
+        stock: 55,
+        featured: true,
+        visible: true,
+        benefits: ['Stimulates Hair Growth', 'Reduces Hair Fall', 'Fights Dandruff', '100% Organic'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        _id: 'fallback-2',
+        name: 'Pure Organic Gulab Jal',
+        price: 149,
+        category: 'Gulab Jal',
+        image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?q=80&w=600&auto=format&fit=crop',
+        description: 'Authentic steam-distilled premium Rose Water crafted from fresh wild roses.',
+        slug: 'pure-organic-gulab-jal',
+        stock: 75,
+        featured: true,
+        visible: true,
+        benefits: ['100% Pure Steam Distilled', 'Natural Hydrating Toner', 'Restores Skin pH', 'No Alcohol'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        _id: 'fallback-3',
+        name: 'Handcrafted Brass Kalash',
+        price: 499,
+        category: 'Handmade Crafts',
+        image: 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?q=80&w=600&auto=format&fit=crop',
+        description: 'Exquisitely handcrafted pure brass Kalash by skilled local artisans.',
+        slug: 'handcrafted-brass-kalash',
+        stock: 25,
+        featured: true,
+        visible: true,
+        benefits: ['Handcrafted Design', '100% Pure Brass', 'Highly Durable', 'Supports Artisans'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        _id: 'fallback-4',
+        name: 'Handmade Terracotta Diya Set',
+        price: 120,
+        category: 'Handmade Crafts',
+        image: 'https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=600&auto=format&fit=crop',
+        description: 'Beautifully hand-painted clay terracotta Diyas by local pottery artists.',
+        slug: 'handmade-terracotta-diya-set',
+        stock: 60,
+        featured: true,
+        visible: true,
+        benefits: ['Eco-friendly Clay', 'Hand-painted', 'Reusable', 'Traditional Festive Vibe'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+  }
 
   return (
     <div className="space-y-16">

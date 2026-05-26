@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Sparkles, Leaf } from 'lucide-react';
 
 interface ChatMessage {
@@ -8,59 +8,81 @@ interface ChatMessage {
   text: string;
 }
 
-const CHAT_RESPONSES: { keywords: string[]; answer: string }[] = [
-  {
-    keywords: ['hair', 'oil', 'hair fall', 'dandruff', 'hair loss', 'growth'],
-    answer: "🌿 For hair fall, dandruff, and strengthening follicles, we highly recommend our **Bhringraj Herbal Hair Oil** (₹299)! It uses organic Bhringraj extracts, cold-pressed Sesame oil, and Amla. Customers report noticeable reduction in hair fall within weeks!"
-  },
-  {
-    keywords: ['rose water', 'gulab jal', 'skin', 'toner', 'glow', 'acne'],
-    answer: "🌹 For organic skin hydration, balanced pH, and a natural refreshing glow, our **Pure Organic Gulab Jal** (₹149) is perfect! It's 100% steam distilled from wild fresh roses and contains no artificial fragrance or alcohol. Great for acne-prone skin!"
-  },
-  {
-    keywords: ['crafts', 'kalash', 'diya', 'handmade', 'puja', 'brass', 'terracotta'],
-    answer: "🎨 We offer authentic traditional **Handmade Crafts** created by local rural artisans. Highlights include our **Handcrafted Brass Kalash** (₹499) for puja rituals and festive decor, and our hand-painted **Terracotta Clay Diya Set** (₹120)!"
-  },
-  {
-    keywords: ['order', 'buy', 'checkout', 'pay', 'purchase', 'whatsapp'],
-    answer: "💬 Ordering is extremely simple! Just add your favorite products to the **Shopping Bag** (cart), enter your name and phone, and click 'Order Instantly via WhatsApp'. Your order request will open directly in WhatsApp to confirm with us. No credit cards or pre-payment required!"
-  },
-  {
-    keywords: ['hello', 'hi', 'hey', 'greetings', 'help', 'menu'],
-    answer: "👋 Namaste! Welcome to Ayu Herbal support. I can recommend natural wellness products or traditional crafts for you! Try asking:\n- *Which oil is good for hair fall?*\n- *Do you have rose water?*\n- *How do I order?*"
-  }
-];
-
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { sender: 'bot', text: "Namaste! 👋 I am your Ayu Herbal helper. Ask me anything about our organic oils, steam-distilled Gulab Jal, or handmade crafts!" }
+    { sender: 'bot', text: "Namaste! 👋 I am your Ayu Assistant. Ask me anything about our organic wellness products, handmade crafts, or how to place your order!" }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading, isOpen]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     const userText = input.trim();
+    // 1. Add user message
     setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setInput('');
+    setIsLoading(true);
 
-    // Predefined logic search matching keywords
-    setTimeout(() => {
-      const normalizedText = userText.toLowerCase();
-      let matchedAnswer = "I couldn't quite match that question. We offer Bhringraj Hair Growth Oil, steam-distilled Rose Water, Brass Kalash, and hand-painted Clay Diyas! Feel free to ask about hair care, skin care, handmade crafts, or ordering!";
+    try {
+      // 2. Format history for API request
+      const formattedMessages = messages.map((msg) => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text,
+      }));
 
-      for (const response of CHAT_RESPONSES) {
-        const found = response.keywords.some(keyword => normalizedText.includes(keyword));
-        if (found) {
-          matchedAnswer = response.answer;
-          break;
-        }
+      // Add the latest user message
+      formattedMessages.push({
+        role: 'user',
+        content: userText,
+      });
+
+      // 3. Request `/api/chat` route
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: formattedMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error('API request failed');
       }
 
-      setMessages((prev) => [...prev, { sender: 'bot', text: matchedAnswer }]);
-    }, 450);
+      const data = await response.json();
+
+      if (data.success && data.reply) {
+        setMessages((prev) => [...prev, { sender: 'bot', text: data.reply }]);
+      } else {
+        throw new Error(data.error || 'Invalid API response');
+      }
+    } catch (error) {
+      console.error('Failed to communicate with chat API:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "I apologize, but I am experiencing connectivity issues. 😔 Please try again shortly or feel free to contact us directly at +91 8209940507!",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,7 +109,7 @@ export default function AIChatbot() {
                 <h4 className="font-bold text-sm leading-tight flex items-center">
                   <span>Ayu Assistant</span>
                 </h4>
-                <span className="text-[10px] text-brand-200 font-medium">Ayurveda expert adviser</span>
+                <span className="text-[10px] text-brand-200 font-medium font-sans">Ayurveda expert adviser</span>
               </div>
             </div>
             <button
@@ -106,9 +128,9 @@ export default function AIChatbot() {
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm font-light ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm font-sans ${
                     msg.sender === 'user'
-                      ? 'bg-brand-700 text-white rounded-tr-none'
+                      ? 'bg-brand-700 text-white rounded-tr-none font-normal'
                       : 'bg-white text-brand-900 border border-beige-200 rounded-tl-none font-normal'
                   }`}
                 >
@@ -116,20 +138,35 @@ export default function AIChatbot() {
                 </div>
               </div>
             ))}
+
+            {/* Bouncing Dots Loading Animation */}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-beige-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center space-x-1.5">
+                  <div className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                  <div className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                  <div className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" />
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Footer Form */}
           <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-beige-200 flex items-center gap-2">
             <input
               type="text"
-              placeholder="Ask: 'Which oil is good for hair fall?'"
+              disabled={isLoading}
+              placeholder={isLoading ? "Please wait..." : "Ask: 'Which oil is good for hair fall?'"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 px-3 py-2 border border-beige-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-beige-50/40 text-xs sm:text-sm"
+              className="flex-1 px-3 py-2 border border-beige-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-beige-50/40 text-xs sm:text-sm disabled:opacity-50"
             />
             <button
               type="submit"
-              className="p-2 bg-brand-700 hover:bg-brand-850 text-white rounded-xl transition-all flex items-center justify-center cursor-pointer shadow"
+              disabled={isLoading || !input.trim()}
+              className="p-2 bg-brand-700 hover:bg-brand-850 text-white rounded-xl transition-all flex items-center justify-center cursor-pointer shadow disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
             </button>
